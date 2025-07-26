@@ -1,4 +1,4 @@
-name: Build Snake Game APK
+name: Build Snake Game APK 🐍📱
 
 on:
   workflow_dispatch:
@@ -15,13 +15,18 @@ jobs:
     - name: 🧾 Checkout Code
       uses: actions/checkout@v4
 
-    - name: 🛠️ Install Dependencies
+    - name: 🛠️ Install System Dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential libssl-dev libffi-dev \
-          python3-dev python3-pip git unzip openjdk-17-jdk wget
+          python3-dev python3-pip git unzip openjdk-17-jdk wget \
+          libncurses5 zlib1g-dev libncurses5-dev libreadline-dev \
+          libsqlite3-dev libgdbm-dev libbz2-dev liblzma-dev
+
+    - name: 🧪 Install Python Packages
+      run: |
         pip install --upgrade pip
-        pip install buildozer
+        pip install buildozer cython
 
     - name: 📦 Accept Android SDK Licenses
       run: |
@@ -38,11 +43,3 @@ jobs:
       with:
         name: snake-game-apk
         path: bin/*.apk
-
-        - name: 🛠️ Install Dependencies
-  run: |
-    sudo apt update
-    sudo apt install -y build-essential libssl-dev libffi-dev \
-      python3-dev python3-pip git unzip openjdk-17-jdk wget
-    pip install --upgrade pip
-    pip install buildozer cython
