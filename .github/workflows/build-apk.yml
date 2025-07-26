@@ -31,25 +31,26 @@ jobs:
         mkdir -p $ANDROID_HOME/cmdline-tools
         cd $ANDROID_HOME/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
-        unzip tools.zip -d tools
-        mv tools $ANDROID_HOME/cmdline-tools/latest
+        unzip tools.zip -d cmdline-tools
+        mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest
 
     - name: ✅ Add SDK Manager to PATH
       run: |
         echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
         echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
         echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
-        export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+        export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
-    - name: 🔍 Check if sdkmanager is in PATH
+    - name: 🔍 Verify sdkmanager Exists
       run: |
-        which sdkmanager
-        sdkmanager --version
+        ls -l $ANDROID_HOME/cmdline-tools/latest/bin
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --version
 
     - name: ✅ Accept Licenses and Install SDK Packages
       run: |
-        sdkmanager --sdk_root=${ANDROID_HOME} --licenses || true
-        sdkmanager --sdk_root=${ANDROID_HOME} "platform-tools" "platforms;android-33" "build-tools;36.0.0"
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+          "platform-tools" "platforms;android-33" "build-tools;36.0.0"
 
     - name: 🚧 Build APK
       run: buildozer -v android debug
