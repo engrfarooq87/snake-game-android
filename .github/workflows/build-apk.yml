@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk # Define ANDROID_HOME for manual SDK setup
+
     steps:
     - name: 📥 Checkout Code
       uses: actions/checkout@v3
@@ -23,21 +26,56 @@ jobs:
         python3 -m pip install --upgrade pip
         python3 -m pip install buildozer cython kivy
 
-    - name: 🚧 Build APK (Let Buildozer manage SDK/NDK)
+    - name: 📦 Set Up Android SDK Command-line Tools (Specific Version)
       run: |
-        # Ensure Buildozer is configured to use the correct Android API and NDK
-        # These are already set in your buildozer.spec, but this emphasizes the point.
-        # buildozer android update  # This command is often used to ensure SDK components are updated via buildozer
-        buildozer -v android debug
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        cd $ANDROID_HOME/cmdline-tools
+        # Use a specific, known-good version of command-line tools if recent_latest causes issues
+        # For example, version 6.0 might be more stable for sdkmanager license acceptance
+        wget https://dl.google.com/android/repository/commandlinetools-linux-6858079_latest.zip -O tools.zip
+        unzip tools.zip -d temp
+        mkdir -p $ANDROID_HOME/cmdline-tools/latest
+        mv temp/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
+
+    - name: ✅ Add SDK Manager to PATH
+      run: |
+        echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+        echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+        # Also ensure platform-tools are installed early as they contain adb etc.
+        # This explicit export might help ensure it's in path for later steps
+        export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+
+    - name: ✅ Accept Licenses and Install SDK Packages (Explicitly)
+      run: |
+        # Use 'expect' to automate license acceptance more reliably
+        # This requires installing 'expect'
+        sudo apt install -y expect
+        
+        # Script to automate 'yes' for sdkmanager
+        expect -c '
+            set timeout -1;
+            spawn $env(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager --licenses;
+            expect {
+                "Accept? (y/N):" { send -- "y\r"; exp_continue; }
+                eof
+            }
+        '
+        
+        # Install required SDK components
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.0" \
+          "ndk;25.1.8937393" # NDK version often matters for Kivy/Buildozer
+
+    - name: 🚧 Build APK
+      run: buildozer -v android debug
       env:
-        # Buildozer often needs JAVA_HOME to find the JDK
-        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64 # This path might vary slightly, but 17 is typically correct for ubuntu-latest
-        # Optionally, you can set ANDROID_SDK_ROOT if buildozer struggles to find it,
-        # but letting buildozer download it is usually more reliable.
-        # ANDROID_SDK_ROOT: ~/.buildozer/android/platform/android-sdk # Example of where buildozer puts it
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64 # Still crucial for Buildozer to find JDK
 
     - name: ⬆️ Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4 # Changed to v4 as per your correction
       with:
         name: SnakeGame-APK
         path: bin/*.apk
