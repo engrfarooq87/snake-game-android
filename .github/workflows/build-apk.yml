@@ -22,11 +22,11 @@ jobs:
         sudo apt update
         sudo apt install -y build-essential libssl-dev libffi-dev \
           python3-dev python3-pip git unzip openjdk-17-jdk wget \
-          libncurses-dev
-        python3 -m pip install --upgrade pip # Changed to python3 -m pip
-        python3 -m pip install buildozer cython kivy # Changed to python3 -m pip
+          libncurses-dev expect # Added 'expect' here
+        python3 -m pip install --upgrade pip # Explicitly use python3 -m pip
+        python3 -m pip install buildozer cython kivy # Explicitly use python3 -m pip
 
-    - name: 📦 Set Up Android SDK Command-line Tools (Fixed)
+    - name: 📦 Set Up Android SDK Command-line Tools
       run: |
         mkdir -p $ANDROID_HOME/cmdline-tools
         cd $ANDROID_HOME/cmdline-tools
@@ -47,17 +47,31 @@ jobs:
         ls -l $ANDROID_HOME/cmdline-tools/latest/bin
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --version
 
-    - name: ✅ Accept Licenses and Install SDK Packages
+    - name: ✅ Accept Licenses and Install SDK Packages (Robustly)
       run: |
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        # Use 'expect' to automate license acceptance more reliably
+        expect -c '
+            set timeout -1;
+            spawn $env(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager --licenses;
+            expect {
+                "Accept? (y/N):" { send -- "y\r"; exp_continue; }
+                eof
+            }
+        '
+        # Install required SDK components. Ensure build-tools matches your buildozer.spec
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-          "platform-tools" "platforms;android-33" "build-tools;36.0.0"
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.0" \
+          "ndk;25.1.8937393" # NDK version matching 25b in buildozer.spec 
 
     - name: 🚧 Build APK
       run: buildozer -v android debug
+      env:
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64 # Set JAVA_HOME for Buildozer
 
     - name: ⬆️ Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4 # Use v4 as corrected
       with:
         name: SnakeGame-APK
         path: bin/*.apk
