@@ -26,6 +26,3 @@ jobs:
       run: |
         buildozer init
 
-    - name: 🚧 Build APK
-      run: |
-        buildozer -v android debug
