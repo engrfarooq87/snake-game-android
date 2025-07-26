@@ -66,6 +66,3 @@ jobs:
         # [cite_start]'android.minapi' should be set to 21 [cite: 6]
         # [cite_start]'android.release_artifact' should be set to 'apk' [cite: 7]
 
-
-    - name: 🚧 Build APK
-      run: buildozer -v android debug
