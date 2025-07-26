@@ -3,7 +3,8 @@ name: Build Android App
 on:
   push:
     branches:
-      - main  # or your target branch
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -11,13 +12,13 @@ jobs:
 
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:${{ env.PATH }}
+      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
     steps:
     - name: 📥 Checkout Code
       uses: actions/checkout@v3
 
-    - name: 🛠️ Install Dependencies
+    - name: 🛠️ Install System Dependencies
       run: |
         sudo apt update
         sudo apt install -y build-essential libssl-dev libffi-dev \
@@ -26,14 +27,14 @@ jobs:
         pip install --upgrade pip
         pip install buildozer cython
 
-    - name: 📦 Install Android SDK Command-line Tools
+    - name: 📦 Download and Set Up Android SDK Command-line Tools
       run: |
         mkdir -p $ANDROID_HOME/cmdline-tools
         cd $ANDROID_HOME/cmdline-tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip commandlinetools-linux-9477386_latest.zip -d latest
 
-    - name: ✅ Accept Licenses & Install SDK Packages
+    - name: ✅ Accept Licenses and Install SDK Packages
       run: |
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "platforms;android-33" "build-tools;36.0.0"
