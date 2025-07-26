@@ -27,12 +27,17 @@ jobs:
         pip install --upgrade pip
         pip install buildozer cython
 
-    - name: 📦 Download and Set Up Android SDK Command-line Tools
+    - name: 📦 Set Up Android SDK Command-line Tools
       run: |
         mkdir -p $ANDROID_HOME/cmdline-tools
         cd $ANDROID_HOME/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip -d latest
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+        unzip tools.zip -d temp
+        mv temp $ANDROID_HOME/cmdline-tools/latest
+        echo "sdkmanager installed at:" $ANDROID_HOME/cmdline-tools/latest/bin
+
+    - name: ✅ Add SDK Manager to PATH
+      run: echo "${ANDROID_HOME}/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
     - name: ✅ Accept Licenses and Install SDK Packages
       run: |
@@ -40,5 +45,4 @@ jobs:
         sdkmanager "platform-tools" "platforms;android-33" "build-tools;36.0.0"
 
     - name: 🚧 Build APK
-      run: |
-        buildozer -v android debug
+      run: buildozer -v android debug
