@@ -12,7 +12,6 @@ jobs:
 
     env:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
     steps:
     - name: 📥 Checkout Code
@@ -36,8 +35,10 @@ jobs:
         mv temp $ANDROID_HOME/cmdline-tools/latest
         echo "sdkmanager installed at:" $ANDROID_HOME/cmdline-tools/latest/bin
 
-    - name: ✅ Add SDK Manager to PATH
-      run: echo "${ANDROID_HOME}/cmdline-tools/latest/bin" >> $GITHUB_PATH
+    - name: ✅ Add SDK Manager to Global PATH
+      run: |
+        echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+        echo "PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools" >> $GITHUB_ENV
 
     - name: ✅ Accept Licenses and Install SDK Packages
       run: |
