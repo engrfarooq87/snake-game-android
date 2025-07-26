@@ -47,9 +47,10 @@ jobs:
         ls -l $ANDROID_HOME/cmdline-tools/latest/bin
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --version
 
-    - name: ✅ Accept Licenses and Install SDK Packages (Robustly)
+    - name: ✅ Accept All SDK Licenses (using expect)
       run: |
-        # Use 'expect' to automate license acceptance more reliably
+        # Use 'expect' to automate license acceptance for all available SDK components.
+        # This tries to accept licenses for anything sdkmanager finds.
         expect -c '
             set timeout -1;
             spawn $env(ANDROID_HOME)/cmdline-tools/latest/bin/sdkmanager --licenses;
@@ -58,17 +59,12 @@ jobs:
                 eof
             }
         '
-        # Install required SDK components. Ensure build-tools matches your buildozer.spec
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-          "platform-tools" \
-          "platforms;android-33" \
-          "build-tools;33.0.0" \
-          "ndk;25.1.8937393" # NDK version matching 25b in buildozer.spec 
+        # Do NOT explicitly install packages here. Let Buildozer handle the specific NDK/SDK/build-tools versions.
 
     - name: 🚧 Build APK
       run: buildozer -v android debug
       env:
-        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64 # Set JAVA_HOME for Buildozer
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64 # Still crucial for Buildozer to find JDK
 
     - name: ⬆️ Upload APK
       uses: actions/upload-artifact@v4 # Use v4 as corrected
