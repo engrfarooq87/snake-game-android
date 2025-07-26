@@ -74,3 +74,4 @@ jobs:
       with:
         name: SnakeGame-APK
         path: bin/*.apk
+        
