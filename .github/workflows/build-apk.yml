@@ -23,9 +23,8 @@ jobs:
         sudo apt install -y build-essential libssl-dev libffi-dev \
           python3-dev python3-pip git unzip openjdk-17-jdk wget \
           libncurses-dev
-        pip install --upgrade pip
-        pip install buildozer cython
-        [cite_start]pip install kivy [cite: 1]
+        python3 -m pip install --upgrade pip
+        python3 -m pip install buildozer cython kivy
 
     - name: 📦 Set Up Android SDK Command-line Tools (Fixed)
       run: |
@@ -58,7 +57,7 @@ jobs:
       run: buildozer -v android debug
 
     - name: ⬆️ Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: SnakeGame-APK
         path: bin/*.apk
