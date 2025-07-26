@@ -12,15 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: kivy/buildozer:latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
+
+    - name: Install Android SDK and accept licenses
+      run: |
+        mkdir -p $ANDROID_HOME/licenses
+        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_HOME/licenses/android-sdk-preview-license
+
     - name: Build APK with Buildozer
       run: |
         buildozer android debug
-    
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
