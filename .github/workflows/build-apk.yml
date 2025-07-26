@@ -26,13 +26,12 @@ jobs:
         python3 -m pip install --upgrade pip
         python3 -m pip install buildozer cython kivy
 
-    - name: 📦 Set Up Android SDK Command-line Tools (Specific Version)
+    - name: 📦 Set Up Android SDK Command-line Tools (Latest Version)
       run: |
         mkdir -p $ANDROID_HOME/cmdline-tools
         cd $ANDROID_HOME/cmdline-tools
-        # Use a specific, known-good version of command-line tools if recent_latest causes issues
-        # For example, version 6.0 might be more stable for sdkmanager license acceptance
-        wget https://dl.google.com/android/repository/commandlinetools-linux-6858079_latest.zip -O tools.zip
+        # Use the general 'latest' URL as the specific version was 404 Not Found
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
         unzip tools.zip -d temp
         mkdir -p $ANDROID_HOME/cmdline-tools/latest
         mv temp/cmdline-tools/* $ANDROID_HOME/cmdline-tools/latest/
@@ -42,7 +41,6 @@ jobs:
         echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
         echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
         echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
-        # Also ensure platform-tools are installed early as they contain adb etc.
         # This explicit export might help ensure it's in path for later steps
         export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
@@ -75,7 +73,7 @@ jobs:
         JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64 # Still crucial for Buildozer to find JDK
 
     - name: ⬆️ Upload APK
-      uses: actions/upload-artifact@v4 # Changed to v4 as per your correction
+      uses: actions/upload-artifact@v4
       with:
         name: SnakeGame-APK
         path: bin/*.apk
