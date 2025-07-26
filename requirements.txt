@@ -1,0 +1,13 @@
+kivy>=2.1.0
+# Kivy is the main framework for creating the mobile app
+
+# For APK building (install separately):
+# buildozer
+# python-for-android
+# cython
+
+# All other modules are part of Python standard library:
+# - random (food generation)
+# - time (game timing)
+
+# Python 3.8+ is recommended for best Kivy compatibility
