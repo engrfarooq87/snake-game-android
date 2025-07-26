@@ -23,9 +23,8 @@ jobs:
         sudo apt install -y build-essential libssl-dev libffi-dev \
           python3-dev python3-pip git unzip openjdk-17-jdk wget \
           libncurses-dev
-        pip install --upgrade pip
-        pip install buildozer cython
-        [cite_start]pip install kivy # Install Kivy as it's a requirement for the app [cite: 1]
+        python3 -m pip install --upgrade pip # Changed to python3 -m pip
+        python3 -m pip install buildozer cython kivy # Changed to python3 -m pip
 
     - name: 📦 Set Up Android SDK Command-line Tools (Fixed)
       run: |
@@ -54,14 +53,11 @@ jobs:
         $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
           "platform-tools" "platforms;android-33" "build-tools;36.0.0"
 
-    # Removed the 'Initialize Buildozer and Copy Files' step because buildozer.spec already exists.
-    # It was causing an error: "ERROR: You already have a buildozer.spec file."
-
     - name: 🚧 Build APK
       run: buildozer -v android debug
 
     - name: ⬆️ Upload APK
-      uses: actions/upload-artifact@v4 # Use v4 for the upload action
+      uses: actions/upload-artifact@v4
       with:
         name: SnakeGame-APK
         path: bin/*.apk
